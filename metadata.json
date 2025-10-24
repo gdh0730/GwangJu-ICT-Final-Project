@@ -1,0 +1,5 @@
+{
+  "name": "Generative AI Marine Monitoring Dashboard",
+  "description": "An AI-powered dashboard for monitoring and analyzing marine environmental data, providing insightful summaries and predictions.",
+  "requestFramePermissions": []
+}
