@@ -2,18 +2,13 @@
 import { GoogleGenAI } from "@google/genai";
 import { MarineData, Region } from '../types';
 
-const apiKey = import.meta.env.VITE_API_KEY as string | undefined;
-
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
-
-if (!ai) {
-  console.warn("VITE_API_KEY is not set. AI analysis will return a fallback message.");
+if (!process.env.API_KEY) {
+  throw new Error("API_KEY environment variable is not set");
 }
 
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
 export const generateAnalysisSummary = async (region: Region, data: MarineData): Promise<string> => {
-  if (!ai) {
-    return "AI 분석을 위해 필요한 API 키가 설정되어 있지 않습니다. 환경 변수를 확인해주세요.";
-  }
   const prompt = `
     당신은 전문 해양 환경 데이터 분석가입니다. 다음 데이터를 바탕으로 선택된 해역에 대한 상세한 분석 보고서를 생성해주세요.
     보고서는 일반인도 이해하기 쉽게 작성하되, 전문적인 식견을 담아주세요. 잠재적 위험 요인이나 특이사항을 강조해주세요.
