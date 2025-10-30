@@ -32,7 +32,6 @@ const App: React.FC = () => {
   const [isDataLoading, setIsDataLoading] = useState<boolean>(true);
   const [isAiLoading, setIsAiLoading] = useState<boolean>(false);
   const [selectedMetric, setSelectedMetric] = useState<MetricKey | null>(null);
-  const [dataError, setDataError] = useState<string | null>(null);
 
   useEffect(() => {
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -56,17 +55,10 @@ const App: React.FC = () => {
     setSelectedRegion(region);
     setAiAnalysis('');
     setIsDataLoading(true);
-    setDataError(null);
     setMarineData(null); // Clear previous data
-    try {
-      const data = await fetchMarineData(region);
-      setMarineData(data);
-    } catch (error) {
-      console.error('Failed to load marine data', error);
-      setDataError('실시간 해양 데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.');
-    } finally {
-      setIsDataLoading(false);
-    }
+    const data = await fetchMarineData(region);
+    setMarineData(data);
+    setIsDataLoading(false);
   }, []);
 
   useEffect(() => {
@@ -109,11 +101,6 @@ const App: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-6 lg:space-y-8">
-            {dataError && (
-              <div className="bg-red-50 border border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-800 dark:text-red-200 p-4 rounded-2xl">
-                {dataError}
-              </div>
-            )}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {(Object.keys(METRICS_CONFIG) as MetricKey[]).map((key) => {
                 const config = METRICS_CONFIG[key];
