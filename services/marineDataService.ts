@@ -14,8 +14,8 @@ const REGION_CONFIG: Record<Region, RegionConfig> = {
 };
 
 const OPEN_METEO_ENDPOINT = 'https://marine-api.open-meteo.com/v1/marine';
-const SALINITY_ENDPOINT = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/jplSMAPSSMISv5.json';
-const CHLOROPHYLL_ENDPOINT = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/erdMH1chlamday.json';
+const SALINITY_ENDPOINT = 'https://coastwatch.noaa.gov/erddap/griddap/jplSmapSssshv418day.json';
+const CHLOROPHYLL_ENDPOINT = 'https://coastwatch.noaa.gov/erddap/griddap/noaacwVIIRSnppchla1day.json';
 const PLASTIC_OCEAN_DATASET = 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Plastic%20ocean%20pollution%20(Meijer%20et%20al.%202021)/Plastic%20ocean%20pollution%20(Meijer%20et%20al.%202021).csv';
 const PLASTIC_WASTE_DATASET = 'https://raw.githubusercontent.com/owid/owid-datasets/master/datasets/Plastic%20waste%20generation%20by%20country%20-%20OWID%20based%20on%20Jambeck%20et%20al.%20%26%20World%20Bank/Plastic%20waste%20generation%20by%20country%20-%20OWID%20based%20on%20Jambeck%20et%20al.%20%26%20World%20Bank.csv';
 
