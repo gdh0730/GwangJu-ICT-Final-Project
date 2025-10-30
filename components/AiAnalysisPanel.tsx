@@ -1,5 +1,20 @@
 import React from 'react';
 
+const renderInlineContent = (text: string): React.ReactNode[] => {
+  return text
+    .split(/(\*\*[^*]+\*\*)/g)
+    .filter(Boolean)
+    .map((segment, index) => {
+      const boldMatch = segment.match(/^\*\*(.*)\*\*$/);
+      if (boldMatch) {
+        return (
+          <strong key={`bold-${index}`}>{boldMatch[1]}</strong>
+        );
+      }
+      return <React.Fragment key={`text-${index}`}>{segment}</React.Fragment>;
+    });
+};
+
 interface AiAnalysisPanelProps {
   analysis: string;
   isLoading: boolean;
@@ -7,26 +22,84 @@ interface AiAnalysisPanelProps {
   selectedRegion: string;
 }
 
-// A simple component to render markdown content safely
 const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
-  const renderContent = () => {
-    // Replace markdown-like syntax with HTML tags
-    const htmlContent = content
-      .replace(/^### (.*$)/gim, '<h3 class="text-md font-bold text-gray-800 dark:text-white mt-4 mb-2">$1</h3>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-lg font-bold text-gray-800 dark:text-white mt-4 mb-2">$1</h2>')
-      .replace(/^# (.*$)/gim, '<h1 class="text-xl font-bold text-gray-800 dark:text-white mt-4 mb-2">$1</h1>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
-      .replace(/\n- (.*$)/gim, '<li class="ml-4 list-disc">$1</li>') // List items
-      .split('\n').map(line => line.trim() === '' ? '<br/>' : line).join('').replace(/(<br\/>){2,}/g, '<br/>') // handle paragraphs
-      .replace(/<li/g, '<ul class="pl-2"><li')
-      .replace(/li><ul/g, 'li></ul><ul') + '</ul>';
+  const lines = content.split('\n');
+  const elements: React.ReactNode[] = [];
+  let listBuffer: string[] = [];
 
-    return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
+  const flushList = (keyPrefix: string) => {
+    if (listBuffer.length === 0) return;
+    elements.push(
+      <ul key={`${keyPrefix}-list`} className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
+        {listBuffer.map((item, index) => (
+          <li key={`${keyPrefix}-item-${index}`}>{renderInlineContent(item)}</li>
+        ))}
+      </ul>
+    );
+    listBuffer = [];
   };
 
-  return <article className="prose prose-sm dark:prose-invert max-w-none">{renderContent()}</article>;
-};
+  lines.forEach((line, index) => {
+    const trimmed = line.trim();
 
+    if (!trimmed) {
+      flushList(`line-${index}`);
+      return;
+    }
+
+    if (trimmed.startsWith('- ')) {
+      listBuffer.push(trimmed.substring(2));
+      return;
+    }
+
+    flushList(`line-${index}`);
+
+    if (trimmed.startsWith('### ')) {
+      elements.push(
+        <h3 key={`h3-${index}`} className="text-md font-bold text-gray-800 dark:text-white mt-4 mb-2">
+          {renderInlineContent(trimmed.substring(4))}
+        </h3>
+      );
+      return;
+    }
+
+    if (trimmed.startsWith('## ')) {
+      elements.push(
+        <h2 key={`h2-${index}`} className="text-lg font-bold text-gray-800 dark:text-white mt-4 mb-2">
+          {renderInlineContent(trimmed.substring(3))}
+        </h2>
+      );
+      return;
+    }
+
+    if (trimmed.startsWith('# ')) {
+      elements.push(
+        <h1 key={`h1-${index}`} className="text-xl font-bold text-gray-800 dark:text-white mt-4 mb-2">
+          {renderInlineContent(trimmed.substring(2))}
+        </h1>
+      );
+      return;
+    }
+
+    elements.push(
+      <p key={`p-${index}`} className="text-sm leading-6">
+        {renderInlineContent(trimmed)}
+      </p>
+    );
+  });
+
+  flushList('final');
+
+  if (elements.length === 0) {
+    return null;
+  }
+
+  return (
+    <article className="prose prose-sm dark:prose-invert max-w-none space-y-2">
+      {elements}
+    </article>
+  );
+};
 
 const AiAnalysisPanel: React.FC<AiAnalysisPanelProps> = ({ analysis, isLoading, onGenerate, selectedRegion }) => {
   return (
@@ -58,14 +131,14 @@ const AiAnalysisPanel: React.FC<AiAnalysisPanelProps> = ({ analysis, isLoading, 
           </div>
         ) : (
           analysis ? (
-             <MarkdownRenderer content={analysis} />
+            <MarkdownRenderer content={analysis} />
           ) : (
             <div className="flex items-center justify-center h-full text-center">
-                <p className="text-gray-500 dark:text-gray-400">
-                    '리포트 생성' 버튼을 눌러
-                    <br />
-                    선택된 해역의 AI 분석을 시작하세요.
-                </p>
+              <p className="text-gray-500 dark:text-gray-400">
+                '리포트 생성' 버튼을 눌러
+                <br />
+                선택된 해역의 AI 분석을 시작하세요.
+              </p>
             </div>
           )
         )}
